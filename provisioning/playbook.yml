@@ -1,0 +1,12 @@
+---
+- name: Ansible Development
+  hosts: all
+  sudo: yes
+
+  roles:
+    - common
+    - zend-server
+    # - mailcatcher
+    # - memcached
+    # - mysql
+    # - nodejs
