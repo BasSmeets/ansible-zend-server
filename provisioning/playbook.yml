@@ -6,7 +6,4 @@
   roles:
     - common
     - zend-server
-    # - mailcatcher
-    # - memcached
-    # - mysql
-    # - nodejs
+    - mysql

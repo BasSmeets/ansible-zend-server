@@ -8,6 +8,7 @@
 ## Available Roles
 
 - Zend-Server
+- MySQL
 
 ##  License
 
