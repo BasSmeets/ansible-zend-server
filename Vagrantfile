@@ -11,7 +11,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config_values = {
     memory: 512,
-    name: "ansible-zend-server",
+    name: "ansible-zend-server-7",
     ip: "192.168.33.10"
   }
 

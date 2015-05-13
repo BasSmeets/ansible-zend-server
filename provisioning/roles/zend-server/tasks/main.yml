@@ -19,7 +19,7 @@
 - name: Add Zend-Server to PATH
   template: src=zend-server.sh dest=/etc/profile.d/zend-server.sh
 
-- name: ensure php.ini memory_limit is ok for Drupal 8
+- name: ensure php.ini memory_limit
   lineinfile: dest=/usr/local/zend/etc/php.ini
               regexp='^memory_limit\s?='
               line='memory_limit = 256M'
