@@ -1,7 +1,8 @@
 ---
 - name: Ansible Development
   hosts: all
-  sudo: yes
+  connection: local
+  become: yes
 
   roles:
     - common

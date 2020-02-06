@@ -1,30 +1,32 @@
 ---
+- name: add nginx repo
+  copy:
+     src: files/nginx.repo 
+     dest: /etc/yum.repos.d/nginx.repo 
+     mode: 0644
+
 - name: add zend-server repo
-  action: template src=zend-server.list.j2 dest=/etc/apt/sources.list.d/zend-server.list mode=0644
+  copy: 
+    src: files/zend.repo 
+    dest: /etc/yum.repos.d/zend.repo 
+    mode: 0644
 
-- name: download zend-server gpg
-  action: get_url url=http://repos.zend.com/zend.key dest=/tmp/zend.gpg mode=0400
-
-- name: add zend-server gpg
-  action: command apt-key add /tmp/zend.gpg
-
-- name: apt update
-  action: apt update_cache=yes
+- name: yum update
+  yum:
+    update_cache: yes
 
 - name: Install Zend-Server packages
-  apt: pkg="{{ item }}" state=latest
-  with_items:
-    - zend-server-php-5.5
+  yum:
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - zend-server-nginx
 
 - name: Add Zend-Server to PATH
   template: src=zend-server.sh dest=/etc/profile.d/zend-server.sh
 
-- name: ensure php.ini memory_limit is ok for Drupal 8
-  lineinfile: dest=/usr/local/zend/etc/php.ini
-              regexp='^memory_limit\s?='
-              line='memory_limit = 256M'
+- name: ensure php.ini memory_limit is 1024M
+  lineinfile: dest=/usr/local/zend/etc/php.ini regexp='^memory_limit\s?=' line='memory_limit = 1024M'
 
-- name: set PHP .ini timezone config (web)
-  lineinfile: dest=/usr/local/zend/etc/php.ini
-               regexp='^;date.timezone\s?='
-               line="date.timezone = \"America/Sao_Paulo\""
+- name: set php.ini timezone config (web)
+  lineinfile: dest=/usr/local/zend/etc/php.ini regexp='^;date.timezone\s?=' line="date.timezone = \"Europe/Amsterdam\""

@@ -1,31 +1,107 @@
 ---
-- name: install MySQL server packages
-  action: apt pkg="{{ item }}" state=present
-  with_items:
-    - mysql-server
-    - mysql-client
-    - python-mysqldb # used by mysql* ansible's modules
-    - mytop
-    - mysqltuner
+- name: add mysql repo
+  copy: 
+    src: files/mysql-community.repo 
+    dest: /etc/yum.repos.d/mysql-community.repo 
+    mode: 0644
 
-# Secure MySQL setup
-- name: update mysql root password for all root accounts
-  mysql_user: name=root host={{ item }} check_implicit_admin=yes password={{ mysql_root_password }} login_user=root login_password={{ mysql_root_password }}
-  with_items:
-    - "{{ hostname }}"
-    - 127.0.0.1
-    - ::1
-    - localhost
+- name: yum update
+  yum:
+    update_cache: yes
 
-- name: ensure anonymous users are not in the database
-  mysql_user: name='' host={{ item }} state=absent login_user=root login_password={{ mysql_root_password }}
-  with_items:
-    - localhost
+- name: install mysql server packages
+  yum:
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - mysql-community-server
+    - MySQL-python
 
-- name: remove the test database
-  mysql_db: name=test state=absent login_user=root login_password={{ mysql_root_password }}
-
-# Update MySQL Config
 - name: Deploy custom mysql config settings
   template: src=custom.ini dest=/etc/mysql/conf.d/custom.ini
   notify: restart mysql
+
+# create ose user, password ose
+
+- name: Create a new database with name 'ose'
+  mysql_db:
+    name: ose
+    state: present
+
+
+
+# download database
+# import database    
+
+- name: Import ose db
+  mysql_db:
+  state: import
+  name: all
+  target: /tmp/dump.sql
+
+  - name: Install mysql 5.7 repo
+  yum:
+    name: "{{ mysql.repo }}"
+    state: present
+
+- name: Install mysql 5.7
+  yum:
+    name: "{{ mysql.packages }}"
+    state: installed
+
+- name: Start the mysql service
+  service:
+    name: mysqld
+    state: started
+    enabled: true
+
+- name: Get temporary password for root user
+  shell: "echo $(grep 'temporary.*root@localhost' /var/log/mysqld.log | sed 's/.*root@localhost: //')"
+  args:
+    creates: /root/.my.cnf
+  register: mysql_tmp_root_password
+  check_mode: false
+
+- name: Decrease mysql password policy
+  shell: 'mysql -e "SET GLOBAL validate_password_policy=LOW;" --connect-expired-password -uroot -p"{{ mysql_tmp_root_password.stdout }}"'
+  args:
+    creates: /root/.my.cnf
+  when: mysql.low_password_policy is defined
+
+- name: Update mysql root password
+  shell: 'mysql -e "SET PASSWORD = PASSWORD(''{{ mysql.root_password }}'');" --connect-expired-password -uroot -p"{{ mysql_tmp_root_password.stdout }}"'
+  args:
+    creates: /root/.my.cnf
+
+- name: Copy .my.cnf file with root password
+  template:
+    src: my.cnf.pass.j2
+    dest: /root/.my.cnf
+    owner: root
+    group: root
+    mode: 0600
+    force: yes
+
+- name: Copy my.cnf global MySQL configuration.
+  template:
+    src: my.cnf.j2
+    dest: /etc/my.cnf
+    owner: root
+    group: root
+    mode: 0644
+    force: yes
+  notify: restart mysql
+
+- name: Setup MySQL users
+  mysql_user:
+    login_user: root
+    login_password: "{{ mysql.root_password }}"
+    name: "{{ item.0.name }}"
+    password: "{{ item.0.mysql.password }}"
+    host: "{{ item.1 }}"
+    priv: "{{ item.0.mysql.privs | join('/') }}"
+    update_password: "always"
+  with_subelements:
+    - "{{ mysql.mysql_users }}"
+    - mysql.hosts
+  when: mysql.mysql_users is defined
