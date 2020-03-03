@@ -1,0 +1,29 @@
+mysql:
+  admin_user: dynaadmin
+  repo: "http://dev.mysql.com/get/mysql57-community-release-el7-8.noarch.rpm"
+  packages:
+    - mysql
+    - mysql-server
+    - MySQL-python
+  bind_address: '0.0.0.0'
+  root_password: 'password'
+  port: "3306"
+  log_error: /var/log/mysql_error.log
+  expire_logs_days: "10"
+  max_allowed_packet: "16M"
+  table_open_cache: "12000"
+  max_heap_table_size: "64M"
+  tmp_table_size: "64M"
+  read_buffer_size: "8M"
+  join_buffer_size: "2M"
+  query_cache_size: "128M"
+  query_cache_limit: "64M"
+  query_cache_type: "1"
+  performance_schema: "OFF"
+  mysqldump_max_allowed_packet: "16M"
+  max_binlog_size: "100M"
+  isamchk_key_buffer: "16M"
+  innodb_buffer_pool_size: "1024M"
+  innodb_buffer_pool_instances: "4"
+  max_connections: "151"
+

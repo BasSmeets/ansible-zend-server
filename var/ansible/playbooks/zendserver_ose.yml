@@ -1,0 +1,12 @@
+---
+- name: Zendserver OSE
+  hosts: all
+  connection: local
+  become: yes
+
+  roles:
+    - common
+    - zend-server
+    - mysql
+    # - redis
+    # - varnish

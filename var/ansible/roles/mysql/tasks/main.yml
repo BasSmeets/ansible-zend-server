@@ -1,0 +1,64 @@
+---
+
+- name: Install mysql 5.7 repo
+  yum:
+    name: "{{ mysql.repo }}"
+    state: present
+
+- name: Install mysql 5.7
+  yum:
+    name: "{{ mysql.packages }}"
+    state: installed
+
+- name: Start the mysql service
+  service:
+    name: mysqld
+    state: started
+    enabled: true
+
+- name: Copy .my.cnf file with root password
+  template:
+    src: my.cnf.pass.j2
+    dest: /root/.my.cnf
+    owner: root
+    group: root
+    mode: 0600
+    force: yes
+
+- name: Copy my.cnf global MySQL configuration.
+  template:
+    src: my.cnf.j2
+    dest: /etc/my.cnf
+    owner: root
+    group: root
+    mode: 0644
+    force: yes
+  notify: restart mysql
+
+- name: Create DB
+  mysql_db:
+    login_host: "{{ ose.mysql.host }}"
+    login_port: "{{ ose.mysql.port }}"
+    login_user: "{{ mysql.admin_user }}"
+    login_password: "{{ mysql.dyna_admin_password }}"
+    name: "{{ ose.mysql.db }}"
+    encoding: "{{ ose.mysql.encoding }}"
+    state: present
+
+- name: Decrease mysql password policy
+  shell: 'mysql -e "SET GLOBAL validate_password_mixed_case_count=0; SET GLOBAL validate_password_number_count=0; SET GLOBAL validate_password_special_char_count=0; SET GLOBAL validate_password_policy=LOW;" -uroot -ppassword'
+
+- name: Create DB user
+  mysql_user:
+    login_host: "{{ ose.mysql.host }}"
+    login_port: "{{ ose.mysql.port }}"
+    login_user: "root"
+    login_password: "{{ mysql.root_password }}"
+    name: "{{ ose.mysql.username }}"
+    password: "password"
+    priv: '{{ ose.mysql.db }}.*:ALL'
+    host: "{{ item }}"
+    state: present
+    update_password: "on_create"
+  with_items:
+    - localhost

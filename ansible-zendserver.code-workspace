@@ -1,9 +1,12 @@
 {
 	"folders": [
-		{
-			"path": "."
-		}
-	],
+    {
+      "path": "."
+    },
+    {
+      "path": "/Users/bas/Projects/devops/aws-omnius-infra"
+    }
+  ],
 	"settings": {
 		"editor.insertSpaces": true,
 		"editor.tabSize": 2,

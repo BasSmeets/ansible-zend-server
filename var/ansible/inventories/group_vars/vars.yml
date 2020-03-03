@@ -1,0 +1,58 @@
+hosts:
+  mysql: "127.0.0.1"
+  redis: "127.0.0.1"
+  ose: "127.0.0.1"
+  varnish:  "127.0.0.1"
+
+redis:
+  enablerepo: epel
+  epel_repo_url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
+  epel_repo_gpg_key_url: "/etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}"
+  epel_repofile_path: "/etc/yum.repos.d/epel.repo"
+  package: redis
+  ipv4_addr: '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
+  bind_addr: 0.0.0.0
+  daemon: redis
+  conf_path: /etc/redis.conf
+  databases: 32  
+
+mysql:
+  telegraf: false
+  low_password_policy: true
+  root_password: "password"
+  dyna_admin_password: "password"
+  admin_user: dynaadmin
+  repo: "https://dev.mysql.com/get/mysql57-community-release-el7-8.noarch.rpm"
+  packages:
+    - mysql
+    - mysql-server
+    - MySQL-python
+  bind_address: "0.0.0.0"
+  port: "3306"
+  log_error: /var/log/mysql_error.log
+  expire_logs_days: "10"
+  max_allowed_packet: "16M"
+  table_open_cache: "12000"
+  max_heap_table_size: "64M"
+  tmp_table_size: "64M"
+  read_priv_buffer_size: "8M"
+  join_buffer_size: "2M"
+  query_cache_size: "128M"
+  query_cache_limit: "64M"
+  query_cache_type: "1"
+  performance_schema: "OFF"
+  mysqldump_max_allowed_packet: "16M"
+  max_binlog_size: "100M"
+  isamchk_key_buffer: "16M"
+  innodb_buffer_pool_size: "1024M"
+  innodb_buffer_pool_instances: "4"
+  max_connections: "151"
+
+vagrant:
+  mysql:
+    host: "{{ hosts.mysql }}"
+    port: 3306
+    db: "ose"
+    username: "ose"
+    password: "password"
+    encoding: "utf8"

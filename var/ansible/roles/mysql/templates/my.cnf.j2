@@ -1,0 +1,43 @@
+# {{ ansible_managed }} #
+
+# For advice on how to change settings please see
+# http://dev.mysql.com/doc/refman/5.7/en/server-configuration-defaults.html
+
+# Basic Settings
+[mysqld]
+port = {{ mysql.port }}
+bind-address = {{ mysql.bind_address }}
+datadir = /var/lib/mysql
+tmpdir = /tmp
+#socket = /var/run/mysqld/mysqld.sock
+pid-file = /var/run/mysqld/mysqld.pid
+log-error = {{ mysql.log_error }}
+expire_logs_days = {{ mysql.expire_logs_days }}
+skip_external_locking
+symbolic-links = 0
+max_binlog_size = {{ mysql.max_binlog_size }}
+max_connections = {{ mysql.max_connections }}
+
+# Other settings
+max_allowed_packet = {{ mysql.max_allowed_packet }}
+table_open_cache = {{ mysql.table_open_cache }}
+max_heap_table_size = {{ mysql.max_heap_table_size }}
+tmp_table_size = {{ mysql.tmp_table_size }}
+read_buffer_size = {{ mysql.read_buffer_size }}
+join_buffer_size = {{ mysql.join_buffer_size }}
+query_cache_size = {{ mysql.query_cache_size }}
+query_cache_limit = {{ mysql.query_cache_limit }}
+query_cache_type = {{ mysql.query_cache_type }}
+performance_schema = {{ mysql.performance_schema }}
+
+# InnoDB settings
+innodb_buffer_pool_size = {{ mysql.innodb_buffer_pool_size }}
+innodb_buffer_pool_instances = {{ mysql.innodb_buffer_pool_instances }}
+
+[mysqldump]
+quick
+quote-names
+max_allowed_packet = {{ mysql.mysqldump_max_allowed_packet }}
+
+[isamchk]
+key_buffer = {{ mysql.isamchk_key_buffer }}
